@@ -10,12 +10,11 @@ class Recipes extends React.Component{
       recipes: data}
   }
   componentDidMount(){
-    document.getElementById("buttonAdd").addEventListener("click",()=>{this.handleAddClick()});
   }
   storageAvailable(storage){
     try {
-        localStorage.setItem("test", "test");
-        localStorage.removeItem("test");
+        localStorage.setItem("temp", "temp");
+        localStorage.removeItem("temp");
         return true;
     } catch(e) {
         return false;
@@ -42,9 +41,16 @@ componentWillUpdate(nextProps, nextState) {
 }
   addForm = () => {
     return(
-      <div className="overlay" style={ { "display": this.state.showAddForm==true ? "block" : "none" } } onClick={ ()=> { this.handleAddClick(); } } >
-    <div className="overlay-content" onClick={ (event)=> { event.stopPropagation(); } }>
+      <div id={`newRecipe`} className="modal fade">
+          <div class="modal-dialog modal-dialog-scrollable" role="document">
+          <div class="modal-content">
+          <div class="modal-header">
         <center><h1>New Recipe</h1></center>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+        <div class="modal-body">
         <div className="addForm">
             <div className="form-group">
                 <label>Titre:</label>
@@ -55,22 +61,21 @@ componentWillUpdate(nextProps, nextState) {
                 <textarea className="form-control input-new" id="newDescription" /><br/>
                 <label>Temps de Préparation:</label>
                 <input type="number" className="form-control input-new" id="newTime" /><br/>
-                <label>Ingredients: </label><a href="#" onClick={()=>test('addForm')} class="text-success"><i
-            class="fa fa-plus fa-sm float-right"></i></a>
+                <label>Ingredients: </label><a href="#" onClick={()=>test('addForm')} className="text-success"><i
+            className="fa fa-plus fa-sm float-right"></i></a>
                 <table className="table table-striped" id="newRecipe-Table">
                   <tbody></tbody>
                 </table>
-                <button type="button" className="btn btn-primary mb-2" onClick={(event)=>this.handleNewRecipe(event)}>Add</button>
             </div>
+            </div>
+            <div class="modal-footer">
+            <button type="button" className="btn btn-primary mb-2" onClick={(event)=>this.handleNewRecipe(event)} data-dismiss="modal">Add</button>
+        </div>
+        </div>
         </div>
     </div>
 </div>
     )
-  }
-  handleAddClick(){
-    this.setState({
-      showAddForm: !this.state.showAddForm
-  });
   }
   handleNewRecipe(){
     var forms = document.getElementsByClassName("input-new");
@@ -101,7 +106,6 @@ componentWillUpdate(nextProps, nextState) {
             });
     test("clear");
     this.addRecipe(recipe);
-    this.handleAddClick();
   }
   }
   addRecipe(recipe){
@@ -127,13 +131,12 @@ componentWillUpdate(nextProps, nextState) {
     this.setState({recipes})
   }
   render(){
-    var r = [];
-    r.push(<>{this.addForm()}</>);
+    let recipes = [];
     for(const key of (Object.keys(this.state.recipes))){
-    r.push(<RecipeCard key={key} recipe={this.state.recipes[key]} deleteFunction={()=>{this.deleteRecipe(key)}} 
+    recipes.push(<RecipeCard key={key} recipe={this.state.recipes[key]} deleteFunction={()=>{this.deleteRecipe(key)}} 
     editFunction={(recipe)=>{this.editRecipe(recipe)}} />);
 }
-return r;
+return [<>{this.addForm()}</>,recipes];
   }
 //    return recipes.map(e => <RecipeCard recipe={recipes[e]} />);
 }
