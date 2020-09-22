@@ -6,12 +6,12 @@ class Recipes extends React.Component{
   constructor(props){
     super(props);
     this.state={
-      showAddForm: false,
-      recipes: data}
+      recipes: data,
+      editableIngredients : []};
   }
   componentDidMount(){
   }
-  storageAvailable(storage){
+  storageAvailable(){
     try {
         localStorage.setItem("temp", "temp");
         localStorage.removeItem("temp");
@@ -21,7 +21,7 @@ class Recipes extends React.Component{
     }
 }
 componentWillMount() {
-    if (this.storageAvailable('localStorage')) {
+    if (this.storageAvailable()) {
         const localRef = localStorage.getItem('recipes',JSON.stringify(this.state.recipes));
         if (localRef) {
             this.setState({
@@ -61,15 +61,20 @@ componentWillUpdate(nextProps, nextState) {
                 <textarea className="form-control input-new" id="newDescription" /><br/>
                 <label>Temps de Préparation:</label>
                 <input type="number" className="form-control input-new" id="newTime" /><br/>
-                <label>Ingredients: </label><a href="#" onClick={()=>test('addForm')} className="text-success"><i
-            className="fa fa-plus fa-sm float-right"></i></a>
+                <label>Ingredients: </label>
                 <table className="table table-striped" id="newRecipe-Table">
-                  <tbody></tbody>
+                {this.state.editableIngredients.map((content,index) => {
+                return ( <tr><td> {
+                        <li className={`add-Ingredients`} contenteditable="true">{content}</li>
+                        } </td><td><a href="#" className="text-danger" onClick={()=>this.deleteIngredientRow(index)}><i
+                        className="fa fa-minus fa-sm float-right"></i></a></td></tr>);})}
+                  <tr><td></td><td><a href="#" onClick={()=>this.addIngredientRow()} className="text-success"><i
+            className="fa fa-plus fa-sm float-right"></i></a></td></tr>
                 </table>
             </div>
             </div>
             <div class="modal-footer">
-            <button type="button" className="btn btn-primary mb-2" onClick={(event)=>this.handleNewRecipe(event)} data-dismiss="modal">Add</button>
+            <button type="button" className="btn btn-primary mb-2" onClick={()=>this.handleNewRecipe()}>Add</button>
         </div>
         </div>
         </div>
@@ -89,11 +94,21 @@ componentWillUpdate(nextProps, nextState) {
                     e.classList.remove("is-invalid");
                 }
             });
+            Array.prototype.forEach.call(document.getElementsByClassName("add-Ingredients"), function(e) {
+                if(e.textContent==""||e.textContent=="_"){
+                    e.classList.add("is-invalid");
+                    valid = false;
+                }
+                else{
+                    e.classList.remove("is-invalid");
+                }
+            });
             if(valid){
     var ingredients = [];
     Array.prototype.forEach.call(document.getElementsByClassName("add-Ingredients"), function(e) {
       ingredients.push(e.textContent);
   });
+  console.log(ingredients);
     var recipe = {
       title: document.getElementById("newTitle").value,
       image: document.getElementById("newImage").value,
@@ -104,10 +119,25 @@ componentWillUpdate(nextProps, nextState) {
     Array.prototype.forEach.call(forms, function(e) {
             e.value="";
             });
-    test("clear");
+            this.setState({
+              editableIngredients : []
+          });
     this.addRecipe(recipe);
+    document.getElementsByClassName("close")[0].click();
   }
   }
+  addIngredientRow(){
+    this.setState({
+        editableIngredients : [...this.state.editableIngredients,"_"]
+    });
+}
+deleteIngredientRow(index){
+    let editableIngredients = [...this.state.editableIngredients];
+    editableIngredients.splice(index,1);
+    this.setState({
+        editableIngredients : [...editableIngredients]
+    });
+}
   addRecipe(recipe){
     const recipes = {...this.state.recipes};
     const last = Date.now();
@@ -122,7 +152,6 @@ componentWillUpdate(nextProps, nextState) {
   }
   editRecipe(recipe){
     var recipes = {...this.state.recipes};
-    console.log(recipes);
     recipes[recipe.recipeID].title=recipe.title;
     recipes[recipe.recipeID].image=recipe.image;
     recipes[recipe.recipeID].description=recipe.description;

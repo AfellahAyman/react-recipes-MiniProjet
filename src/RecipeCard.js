@@ -4,8 +4,9 @@ class RecipeCard extends React.Component {
             super(props);
             this.recipe = props.recipe;
             this.recipeID = this.recipe.recipeID;
-            this.ingredients = this.recipe.ingredients;
-            this.state={editableIngredients : [...this.ingredients]};
+            this.state={
+                ingredients : this.recipe.ingredients,
+                editableIngredients : [...this.recipe.ingredients]};
         }
         componentDidUpdate(){
         }
@@ -21,7 +22,7 @@ class RecipeCard extends React.Component {
                     <div class="modal-body"><div className="ingredients">
                         <h5>Ingredients: </h5>
                         < table className="table table-striped">
-                            <tbody>{this.ingredients.map(i => {
+                            <tbody>{this.state.ingredients.map(i => {
                 return ( <tr><td> {
                         <li>{i}</li>
                         } </td></tr>);})}</tbody>
@@ -77,7 +78,7 @@ class RecipeCard extends React.Component {
         }
         recipeCard = () =>{
             return(
-                <div className="col-md-4 p-3">
+                <div className="col-sm-4 py-2">
                 <div className="recipeCard">
                     <button type="button" className="btn btn-warning btn-rounded" onClick={()=>this.refreshEditableIngredients()} data-toggle="modal" data-target={`#edit${this.recipeID}`} >
                         < i style={ { "color": "white" } } className="fa fa-pencil-square-o fa-lg"> </i>
@@ -86,31 +87,31 @@ class RecipeCard extends React.Component {
                         < i className="fa fa-minus fa-lg"> </i>
                     </button>
                 </div>
-                <div className="card box-shadow">
-                    <img className="card-img-top" src={ this.recipe.image }/>
-                    <div className="card-body">
-                        <center>
-                            <h6> {
+                <div class="card box-shadow card h-100">
+                <img className="card-img-top" src={ this.recipe.image }/>
+                    <div class="card-body">
+                    <h4 class="card-title text-center">{
                                 this.recipe.title
-                            } </h6> </center>
-                        <div className="card-text"> { this.recipe.description }
-                            <div className="d-flex justify-content-between align-items-center">
+                            }</h4>
+      <p class="card-text row align-items-center h-100">{ this.recipe.description }
+                           </p>
+    </div>
+    <div class="card-footer"> <div className="d-flex justify-content-between">
                                 <div className="Empty"></div>
                                 <small className="text-muted timeText">Total Time: {
                                 this.recipe.time
                             } {
                                 this.recipe.time !== "1" ? "mins" : "min"
                             } </small> </div>
-                        </div>
-                        <center>
-                            <a href="#" className = "btn btn-primary stretched-link ingredientsButton" data-toggle="modal" data-target={`#ingredients${this.recipeID}`} > Ingredients </a> </center>
-                    </div>
-                </div>
+        <center>    <a href="#" className = "btn btn-primary stretched-link ingredientsButton" data-toggle="modal" data-target={`#ingredients${this.recipeID}`} > Ingredients </a>
+</center>
+    </div>
+  </div>
             </div>
             );
         }
         refreshEditableIngredients(){
-            let editableIngredients = [...this.ingredients];
+            let editableIngredients = [...this.state.ingredients];
             this.setState({editableIngredients});
             
         }
@@ -127,10 +128,19 @@ class RecipeCard extends React.Component {
             });
         }
         handleEditRecipe(){
+            
             var forms = document.getElementsByClassName("input-"+this.recipeID);
             let valid = true;
             Array.prototype.forEach.call(forms, function(e) {
-                if(e.value=="" || e.value == "_"){
+                if(e.value==""){
+                    e.classList.add("is-invalid");
+                    valid = false;
+                }
+                else{
+                    e.classList.remove("is-invalid");
+                }});
+            Array.prototype.forEach.call(document.getElementsByClassName("editableIngredient"+this.recipeID), function(e) {
+                if(e.textContent=="" || e.textContent=="_"){
                     e.classList.add("is-invalid");
                     valid = false;
                 }
@@ -143,7 +153,6 @@ class RecipeCard extends React.Component {
                 Array.prototype.forEach.call(document.getElementsByClassName("editableIngredient"+this.recipeID), function(e) {
                     ingredients.push(e.textContent);
                 });
-                console.log(ingredients);
             var recipe = {
                 recipeID: this.recipeID,
                 title: document.getElementById("editTitle" + this.recipeID).value,
@@ -153,6 +162,8 @@ class RecipeCard extends React.Component {
                 ingredients
             };
             this.props.editFunction(recipe);
+            this.setState({ingredients});
+            document.getElementsByClassName("close")[0].click();
         }
         }
         render() {
